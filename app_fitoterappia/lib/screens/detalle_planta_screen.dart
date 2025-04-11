@@ -1,5 +1,8 @@
 import 'package:app_fitoterappia/models/Plants.dart';
+import 'package:app_fitoterappia/screens/aplicaciones_uso_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:app_fitoterappia/providers/plant_provider.dart';
 
 class DetallePlantaScreen extends StatelessWidget {
   final Plants planta;
@@ -82,6 +85,9 @@ class DetallePlantaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PlantProvider>().planta = planta; // Guardamos la planta en el provider
+    });
     return Scaffold(
       backgroundColor: const Color(0xFFF0F9E3),
       appBar: AppBar(
@@ -174,6 +180,10 @@ class DetallePlantaScreen extends StatelessWidget {
                   () {
                     // Aquí puedes redirigir a la vista de Aplicaciones
                     print("Navegando a Aplicaciones");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AplicacionesUsoScreen()),
+                    );
                   },
                   Color(0xFFeab463)
                 ),
