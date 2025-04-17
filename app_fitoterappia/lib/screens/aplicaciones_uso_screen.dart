@@ -1,3 +1,4 @@
+import 'package:app_fitoterappia/screens/cultivo_recoleccion_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
@@ -252,6 +253,10 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
             'assets/icons/cultivo_icon.png',
             () {
               print("Navegando a Cultivo");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CultivoRecoleccionScreen()),
+              );
             },
             const Color(0xFFc2c2c4),
           ),

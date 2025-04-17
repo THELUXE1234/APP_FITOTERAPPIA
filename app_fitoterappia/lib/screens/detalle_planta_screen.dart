@@ -1,5 +1,6 @@
 import 'package:app_fitoterappia/models/Plants.dart';
 import 'package:app_fitoterappia/screens/aplicaciones_uso_screen.dart';
+import 'package:app_fitoterappia/screens/cultivo_recoleccion_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
@@ -193,6 +194,10 @@ class DetallePlantaScreen extends StatelessWidget {
                   () {
                     // Aquí puedes redirigir a la vista de Cultivo
                     print("Navegando a Cultivo");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CultivoRecoleccionScreen()),
+                    );
                   }, 
                   Color(0xFFc2c2c4)
                 ),
