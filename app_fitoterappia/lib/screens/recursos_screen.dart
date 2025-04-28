@@ -4,22 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
 
-class CultivoRecoleccionScreen extends StatefulWidget {
-  const CultivoRecoleccionScreen({super.key});
+class InfoFarmacologicaScreen extends StatefulWidget {
+  const InfoFarmacologicaScreen({super.key});
 
   @override
-  _CultivoRecoleccionScreenState createState() => _CultivoRecoleccionScreenState();
+  _InfoFarmacologicaScreenState createState() => _InfoFarmacologicaScreenState();
 }
 
-class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
+class _InfoFarmacologicaScreenState extends State<InfoFarmacologicaScreen> {
   late Map<String, bool> expandedSections;
 
   @override
   void initState() {
     super.initState();
     expandedSections = {
-      'DESCRIPCIÓN DE LA PLANTA': false,
-      'CULTIVO Y RECOLECCIÓN': false,
+      'INFORMACIÓN FARMACOLÓGICA': false,
+      'REFERENCIAS': false,
     };
   }
 
@@ -71,9 +71,9 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-        title: 'Recomendaciones para el cultivo',
+        title: 'Información Avanzada (Recursos)',
         childHeight: _iconSize + 30,
-        color: const Color(0xFFc2c2c4),
+        color: const Color(0xFF57a4a7),
         firstIcon: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -95,7 +95,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'assets/icons/icon_recomendaciones_seccion.png',
+                    'assets/icons/icon_recursos_seccion.png',
                     height: _iconSize,
                     width: _iconSize,
                     fit: BoxFit.contain,
@@ -103,7 +103,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                 ),
               ),
               const Text(
-                'Recomendaciones para el cultivo',
+                'Información Avanzada (Recursos)',
                 style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.bold,
@@ -115,7 +115,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
         ),
       ),
       bottomNavigationBar: SizedBox(
-        height: 140, // Barra de navegación fija
+        height: 140, // Ajustado para que no se expanda
         child: buildNavigationBar(context),
       ),
       body: Column(
@@ -144,13 +144,14 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
           ),
           const SizedBox(height: 10),
 
-          // Botón de Descripción de la Planta
+          // Botón de Información Farmacológica
           _buildInfoSection(
-            'DESCRIPCIÓN DE LA PLANTA',
-            disabled: hasAnyExpanded && !expandedSections['DESCRIPCIÓN DE LA PLANTA']!,
+            'INFORMACIÓN FARMACOLÓGICA',
+            disabled: hasAnyExpanded && !expandedSections['INFORMACIÓN FARMACOLÓGICA']!,
           ),
 
-          if (expandedSections['DESCRIPCIÓN DE LA PLANTA']!)
+          // Overlay Información Farmacológica
+          if (expandedSections['INFORMACIÓN FARMACOLÓGICA']!)
             Expanded(
               child: SingleChildScrollView(
                 child: Container(
@@ -172,7 +173,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Descripción:',
+                        'Información Farmacológica:',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -180,7 +181,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        planta?.descripcion ?? 'Información no disponible',
+                        planta?.precauciones ?? 'Información no disponible',
                         style: const TextStyle(fontSize: 14),
                       ),
                     ],
@@ -189,13 +190,14 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
               ),
             )
           else ...[
-            // Botón de Cultivo y Recolección
+            // Botón de Referencias
             _buildInfoSection(
-              'CULTIVO Y RECOLECCIÓN',
-              disabled: hasAnyExpanded && !expandedSections['CULTIVO Y RECOLECCIÓN']!,
+              'REFERENCIAS',
+              disabled: hasAnyExpanded && !expandedSections['REFERENCIAS']!,
             ),
 
-            if (expandedSections['CULTIVO Y RECOLECCIÓN']!)
+            // Overlay Referencias
+            if (expandedSections['REFERENCIAS']!)
               Expanded(
                 child: SingleChildScrollView(
                   child: Container(
@@ -217,7 +219,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Instrucciones de Cultivo:',
+                          'Referencias:',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -225,20 +227,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          planta?.instruccionesDeCultivo ?? 'Información no disponible',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Cuidado y Cosecha:',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          planta?.cuidadoYCosecha ?? 'Información no disponible',
+                          planta?.otrosAntecedentes ?? 'Información no disponible',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],

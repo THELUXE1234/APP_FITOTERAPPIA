@@ -1,4 +1,5 @@
-import 'package:app_fitoterappia/screens/cultivo_recoleccion_screen.dart';
+import 'package:app_fitoterappia/components/app_bar.dart';
+import 'package:app_fitoterappia/components/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
@@ -56,14 +57,14 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
     BuildContext context,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: GestureDetector(
         onTap: () {
           _toggleSection(title); // Alternamos el estado de la expansión
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          margin: const EdgeInsets.symmetric(vertical: 5),
+          margin: const EdgeInsets.symmetric(vertical: 3),
           decoration: BoxDecoration(
             color: const Color(0xFF59373e),
             borderRadius: BorderRadius.circular(90),
@@ -84,9 +85,9 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      title.toUpperCase(),
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -95,7 +96,7 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                     Text(
                       description,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Colors.white,
                       ),
                     ),
@@ -118,29 +119,64 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
   @override
   Widget build(BuildContext context) {
     final planta = context.watch<PlantProvider>().planta;
-    
+    final _iconSize = 65.0;
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F9E3),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: 'Aplicaciones y uso Terapeútico',
+        childHeight: _iconSize + 30,
+        color: Color(0xFFeab463),
+        firstIcon: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Aplicaciones y uso Terapéutico',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        child: Transform.translate(
+          offset: const Offset(0, -35), // Eleva la imagen hacia arriba
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(width: 5.0, color: Colors.white),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/icons/icon_aplicaciones_seccion.png',
+                    height: _iconSize,
+                    width: _iconSize,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const Text(
+                'Aplicaciones y uso Terapeútico',
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+      bottomNavigationBar: SizedBox(
+        height: 140, // Ajustado para que no se expanda
+        child: buildNavigationBar(context),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 20),
             // Título de la planta
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 0),
+              padding: const EdgeInsets.symmetric(horizontal: 65, vertical: 5),
               decoration: BoxDecoration(
                 color: const Color(0xFFE6E652),
                 borderRadius: BorderRadius.circular(16),
@@ -151,9 +187,9 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                   Text(
                     planta?.nombreComun ?? 'Planta no encontrada',
                     style: const TextStyle(
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3D813A),
+                      color: Color(0xFF59373e),
                     ),
                   ),
                 ],
@@ -186,6 +222,7 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -193,7 +230,7 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                     ),
                   ],
                 ),
-                height: isExpanded ? 120 : 0, // Controla la altura para expandir o colapsar
+                height: isExpanded ? 250 : 0, // Controla la altura para expandir o colapsar
                 child: isExpanded
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,6 +240,7 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Colors.orange,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -217,100 +255,11 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
             }).toList(),
 
             const SizedBox(height: 0.2),
-            // Botones de acción en la parte inferior
-            _buildNavigationBar(context),
           ],
         ),
       ),
     );
   }
 
-  // Widget para la barra de navegación en la parte inferior
-  Widget _buildNavigationBar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 25),
-      decoration: const BoxDecoration(
-        color: Color(0xFF294029),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(90)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildActionButton(
-            'Aplicaciones',
-            'assets/icons/aplicaciones_icon.png',
-            () {
-              print("Navegando a Aplicaciones");
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AplicacionesUsoScreen()),
-              );
-            },
-            const Color(0xFFeab463),
-          ),
-          _buildActionButton(
-            'Cultivo',
-            'assets/icons/cultivo_icon.png',
-            () {
-              print("Navegando a Cultivo");
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CultivoRecoleccionScreen()),
-              );
-            },
-            const Color(0xFFc2c2c4),
-          ),
-          _buildActionButton(
-            'Precauciones',
-            'assets/icons/precauciones_icon.png',
-            () {
-              print("Navegando a Precauciones");
-            },
-            const Color(0xFFb24e97),
-          ),
-          _buildActionButton(
-            'Recursos',
-            'assets/icons/recursos_icon.png',
-            () {
-              print("Navegando a Recursos");
-            },
-            const Color(0xFF57a4a7),
-          ),
-        ],
-      ),
-    );
-  }
 
-  // Widget para los botones de navegación inferiores
-  Widget _buildActionButton(String title, String iconPath, VoidCallback onTap, Color color) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 30, // Hace el botón circular
-            backgroundColor: color, // Fondo verde
-            child: ClipOval(
-              child: Image.asset(
-                iconPath,
-                height: 50,
-                width: 50,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
