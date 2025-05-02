@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:app_fitoterappia/models/Plants.dart';
 import 'package:app_fitoterappia/screens/detalle_planta_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class BuscarNombreScreen extends StatefulWidget {
   const BuscarNombreScreen({super.key});
@@ -18,18 +21,98 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
   String busqueda = "";
   int? selectedIndex;
 
-  Future<void> getPlantas() async {
-    final uri = Uri.parse("http://10.0.2.2:5000/api/plantas");
-    final response = await http.get(uri);
+  // Verificar si se debe hacer la sincronización (una vez por semana)
+  Future<void> checkSync() async {
+    final prefs = await SharedPreferences.getInstance();
+    //await prefs.remove('lastSyncDate');
+    final lastSyncDate = prefs.getString('lastSyncDate');
+    final currentDate = DateTime.now().toString().split(' ')[0]; // Solo fecha (YYYY-MM-DD)
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as List;
-      setState(() {
-        plantas = data.map((json) => Plants.fromJson(json)).toList();
-      });
-    } else {
-      throw Exception("Fallo la conexión");
+    if (lastSyncDate == null || lastSyncDate != currentDate) {
+      await syncData();  // Si es la primera vez o ha pasado más de una semana, sincronizamos
     }
+    await loadLocalData();
+  }
+
+  // Sincronizar datos desde la API
+  Future<void> syncData() async {
+    final apiUrl = dotenv.env['API_URL'];
+    final uri = Uri.parse(apiUrl!);
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+
+        // Guardamos los datos localmente
+        await saveDataLocally(response.body);
+        print("listo");
+        // Actualizamos la fecha de la última sincronización
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('lastSyncDate', DateTime.now().toString().split(' ')[0]);
+      } else {
+        throw Exception("Fallo la conexión");
+      }
+    } catch (e) {
+      print("Error de sincronización: $e");
+      // final directory = await getApplicationDocumentsDirectory();
+      // final file = File('${directory.path}/plantas.json');
+      
+      // if (await file.exists()) {
+      //   await file.delete();
+      //   print("Datos locales eliminados.");
+      // }
+    }
+  }
+
+  // Guardar datos localmente
+  Future<void> saveDataLocally(String data) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/plantas.json');
+    await file.writeAsString(data);
+  }
+
+  // Cargar datos desde el almacenamiento local
+  Future<void> loadLocalData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/plantas.json');
+    
+    if (await file.exists()) {
+      final data = await file.readAsString();
+      setState(() {
+        plantas = (json.decode(data) as List).map((json) => Plants.fromJson(json)).toList();
+      });
+      print("data cargada");
+    }else {
+      print("No se encontraron datos locales.");
+      showErrorMessage(); // Mostrar mensaje si no hay datos locales
+    }
+  }
+
+  // Mostrar mensaje de error si no hay internet
+  void showErrorMessage() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Sin Conexión a Internet"),
+        content: Text("Por favor, conecta a internet para sincronizar los datos."),
+        actions: <Widget>[
+          TextButton(
+            child: Text("Aceptar"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkSync();  // Verificar y sincronizar al iniciar
   }
 
   void filtrarPlantas(String query) {
@@ -46,12 +129,6 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
         }).toList();
       }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getPlantas();
   }
 
   @override
@@ -214,7 +291,6 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
           ),
         ),
       ),
-
     );
   }
 }

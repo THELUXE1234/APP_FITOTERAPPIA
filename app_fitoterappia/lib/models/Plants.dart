@@ -21,6 +21,19 @@ class Plants {
   List<String>? definicionEfectos;
   String? precauciones;
   String? otrosAntecedentes;
+  
+  // Nuevos atributos añadidos
+  String? tipoDePlanta;
+  String? altura;
+  String? hojas;
+  String? flores;
+  String? periodoDeVida;
+  String? temperaturaIdeal;
+  String? exposicionSolar;
+  String? suelo;
+  String? propagacion;
+  String? riego;
+  String? cosecha;
 
   Plants({
     this.id,
@@ -35,6 +48,18 @@ class Plants {
     this.definicionEfectos,
     this.precauciones,
     this.otrosAntecedentes,
+    // Nuevos atributos añadidos
+    this.tipoDePlanta,
+    this.altura,
+    this.hojas,
+    this.flores,
+    this.periodoDeVida,
+    this.temperaturaIdeal,
+    this.exposicionSolar,
+    this.suelo,
+    this.propagacion,
+    this.riego,
+    this.cosecha,
   });
 
   factory Plants.fromJson(Map<String, dynamic> json) => Plants(
@@ -50,6 +75,19 @@ class Plants {
     definicionEfectos: List<String>.from(json["Definicion_efectos"].map((x) => x)),
     precauciones: json["precauciones"],
     otrosAntecedentes: json["otros_antecedentes"],
+    
+    // Nuevos atributos añadidos
+    tipoDePlanta: json["tipo_de_planta"],
+    altura: json["altura"],
+    hojas: json["hojas"],
+    flores: json["flores"],
+    periodoDeVida: json["periodo_de_vida"],
+    temperaturaIdeal: json["temperatura_ideal"],
+    exposicionSolar: json["exposicion_solar"],
+    suelo: json["suelo"],
+    propagacion: json["propagacion"],
+    riego: json["riego"],
+    cosecha: json["cosecha"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -65,6 +103,19 @@ class Plants {
     "Definicion_efectos": List<dynamic>.from(definicionEfectos!.map((x) => x)),
     "precauciones": precauciones,
     "otros_antecedentes": otrosAntecedentes,
+    
+    // Nuevos atributos añadidos
+    "tipo_de_planta": tipoDePlanta,
+    "altura": altura,
+    "hojas": hojas,
+    "flores": flores,
+    "periodo_de_vida": periodoDeVida,
+    "temperatura_ideal": temperaturaIdeal,
+    "exposicion_solar": exposicionSolar,
+    "suelo": suelo,
+    "propagacion": propagacion,
+    "riego": riego,
+    "cosecha": cosecha,
   };
 }
 

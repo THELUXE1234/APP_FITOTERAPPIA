@@ -4,6 +4,7 @@ import 'package:app_fitoterappia/models/Plants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
+import 'package:diacritic/diacritic.dart';
 
 class DetallePlantaScreen extends StatelessWidget {
   final Plants planta;
@@ -60,6 +61,10 @@ class DetallePlantaScreen extends StatelessWidget {
     );
   }
 
+  String _getImageName(String? name) {
+    return removeDiacritics(name!.toLowerCase().replaceAll(' ', ''));
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -84,7 +89,7 @@ class DetallePlantaScreen extends StatelessWidget {
           // Nombre común y científico
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 0), //Espacio desde arriba y al lado
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFcfde52),
               borderRadius: BorderRadius.circular(12),
@@ -125,13 +130,13 @@ class DetallePlantaScreen extends StatelessWidget {
                     onTap: () {
                       _showImagePreview(
                         context,
-                        'assets/images/${planta.nombreComun?.toLowerCase()}.jpg',
+                        'assets/images/${_getImageName(planta.nombreComun)}.jpg',
                       );
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                        'assets/images/${planta.nombreComun?.toLowerCase()}.jpg',
+                        'assets/images/${_getImageName(planta.nombreComun)}.jpg',
                         height: 350,
                         width: 197,
                         fit: BoxFit.cover,
@@ -145,11 +150,11 @@ class DetallePlantaScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSecondaryImage(context, 'assets/images/${planta.nombreComun?.toLowerCase()}_1.jpg'),
+                    _buildSecondaryImage(context, 'assets/images/${_getImageName(planta.nombreComun)}_1.jpg'),
                     const SizedBox(height: 10),
-                    _buildSecondaryImage(context, 'assets/images/${planta.nombreComun?.toLowerCase()}_2.jpg'),
+                    _buildSecondaryImage(context, 'assets/images/${_getImageName(planta.nombreComun)}_2.jpg'),
                     const SizedBox(height: 10),
-                    _buildSecondaryImage(context, 'assets/images/${planta.nombreComun?.toLowerCase()}_3.jpg'),
+                    _buildSecondaryImage(context, 'assets/images/${_getImageName(planta.nombreComun)}_3.jpg'),
                   ],
                 ),
               ],

@@ -123,7 +123,7 @@ class _InfoFarmacologicaScreenState extends State<InfoFarmacologicaScreen> {
           // Título de la planta
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 0),
-            padding: const EdgeInsets.symmetric(horizontal: 65, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFE6E652),
               borderRadius: BorderRadius.circular(16),
@@ -180,10 +180,25 @@ class _InfoFarmacologicaScreenState extends State<InfoFarmacologicaScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        planta?.precauciones ?? 'Información no disponible',
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                       if (planta?.usosTradicionales != null && planta!.usosTradicionales!.isNotEmpty)
+                        const Text(
+                          'Usos Tradicionales:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      if (planta?.usosTradicionales != null && planta!.usosTradicionales!.isNotEmpty)
+                        ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: planta?.usosTradicionales?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            return Text(
+                              '${index + 1}. ${planta!.usosTradicionales![index]}',
+                              style: const TextStyle(fontSize: 14),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
@@ -227,7 +242,7 @@ class _InfoFarmacologicaScreenState extends State<InfoFarmacologicaScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          planta?.otrosAntecedentes ?? 'Información no disponible',
+                          'Información no disponible',
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],

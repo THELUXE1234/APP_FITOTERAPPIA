@@ -126,7 +126,7 @@ class _PrecaucionesScreenState extends State<PrecaucionesScreen> {
           // Título de la planta
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 0),
-            padding: const EdgeInsets.symmetric(horizontal: 65, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFE6E652),
               borderRadius: BorderRadius.circular(16),

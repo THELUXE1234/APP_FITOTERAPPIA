@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+
 class CustomAppBarNoImageWithBackground extends StatelessWidget implements PreferredSizeWidget {
   final Widget firstIcon;
   final String title;
@@ -38,9 +40,31 @@ class CustomAppBarNoImageWithBackground extends StatelessWidget implements Prefe
                     children: <Widget>[
                       firstIcon,
                       const Spacer(),
-                      IconButton(
+                      PopupMenuButton<String>(
+                        color: const Color(0xFFE6E652),
                         icon: const Icon(Icons.menu, color: Colors.black),
-                        onPressed: () {},
+                        onSelected: (value) {
+                          if (value == 'inicio') {
+                            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false); // Ir a inicio
+                          } else if (value == 'salir') {
+                            // Salir de la app
+                            Future.delayed(Duration(milliseconds: 200), () {
+                              // O directamente:
+                              //import 'dart:io';
+                              exit(0);
+                            });
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'inicio',
+                            child: Center(child: Text('INICIO')),
+                          ),
+                          const PopupMenuItem(
+                            value: 'salir',
+                            child: Center(child: Text('SALIR')),
+                          ),
+                        ],
                       ),
                     ],
                   ),

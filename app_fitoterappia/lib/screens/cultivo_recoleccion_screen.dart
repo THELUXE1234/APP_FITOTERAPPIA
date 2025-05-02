@@ -123,7 +123,7 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
           // Título de la planta
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 75, vertical: 0),
-            padding: const EdgeInsets.symmetric(horizontal: 65, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFE6E652),
               borderRadius: BorderRadius.circular(16),
@@ -180,9 +180,71 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        planta?.descripcion ?? 'Información no disponible',
+                        planta?.descripcion ?? '',
                         style: const TextStyle(fontSize: 14),
                       ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Text(
+                            'Tipo de planta: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            planta?.tipoDePlanta ?? "Información no disponible",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Altura: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            planta?.altura ?? "Información no disponible",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Hojas: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            planta?.hojas ?? "Información no disponible",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Flores: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            planta?.flores ?? "Información no disponible",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            'Periodo de vida: ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            planta?.periodoDeVida ?? "Información no disponible",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      
                     ],
                   ),
                 ),
@@ -241,6 +303,75 @@ class _CultivoRecoleccionScreenState extends State<CultivoRecoleccionScreen> {
                           planta?.cuidadoYCosecha ?? 'Información no disponible',
                           style: const TextStyle(fontSize: 14),
                         ),
+                        const SizedBox(height: 10),          // Usamos Row para mostrar el nombre y el valor en la misma línea
+                        Text(
+                          'Temperatura ideal: ',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          planta?.temperaturaIdeal ?? "Información no disponible",
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Exposición solar: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                planta?.exposicionSolar ?? "Información no disponible",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Suelo: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                planta?.suelo ?? "Información no disponible",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Propagación: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                planta?.propagacion ?? "Información no disponible",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Riego: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                planta?.riego ?? "Información no disponible",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Text(
+                                'Cosecha: ',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                planta?.cosecha ?? "Información no disponible",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
