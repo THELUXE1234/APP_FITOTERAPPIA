@@ -28,6 +28,17 @@ def create_plants_dataset():
             "Definicion_efectos": row['Definicion Efecto'].split(' / ') if pd.notnull(row['Definicion Efecto']) else None,  # Convertir en lista o None
             "precauciones": row['Precauciones'] if pd.notnull(row['Precauciones']) else None,  # Convertir en lista o None
             "otros_antecedentes": row['Otros antecedentes'] if pd.notnull(row['Otros antecedentes']) else None,
+            "tipo_de_planta": row['Tipo de planta'] if pd.notnull(row['Tipo de planta']) else None,
+            "altura": row['Altura'] if pd.notnull(row['Altura']) else None,
+            "hojas": row['Hojas'] if pd.notnull(row['Hojas']) else None,
+            "flores": row['flores'] if pd.notnull(row['flores']) else None,
+            "periodo_de_vida": row['Periodo de vida'] if pd.notnull(row['Periodo de vida']) else None,
+            "temperatura_ideal": row['Temperatura ideal'] if pd.notnull(row['Temperatura ideal']) else None,
+            "exposicion_solar": row['Exposición solar'] if pd.notnull(row['Exposición solar']) else None,
+            "suelo": row['Suelo'] if pd.notnull(row['Suelo']) else None,
+            "propagacion": row['Propagación'] if pd.notnull(row['Propagación']) else None,
+            "riego": row['Riego'] if pd.notnull(row['Riego']) else None,
+            "cosecha": row['Cosecha'] if pd.notnull(row['Cosecha']) else None,
         }
         
         # Agregar documento a la lista
