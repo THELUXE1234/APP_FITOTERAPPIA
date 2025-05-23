@@ -157,7 +157,7 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 80),
+                const SizedBox(height: 60),
                 // Título decorativo
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
