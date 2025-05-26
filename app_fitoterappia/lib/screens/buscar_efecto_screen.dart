@@ -8,26 +8,36 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
-class BuscarNombreScreen extends StatefulWidget {
-  const BuscarNombreScreen({super.key});
+class BuscarEfectoScreen extends StatefulWidget {
+  const BuscarEfectoScreen({super.key});
 
   @override
-  State<BuscarNombreScreen> createState() => _BuscarNombreScreenState();
+  State<BuscarEfectoScreen> createState() => _BuscarEfectoScreenState();
 }
 
-class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
+class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
   List<Plants> plantas = [];
   List<Plants> plantasFiltradas = [];
+  Set<String> efectosDisponibles = {}; // Conjunto para almacenar efectos únicos
   String busqueda = "";
   int? selectedIndex;
-  final TextEditingController _searchController = TextEditingController();
-  // Nueva variable de estado para controlar la visibilidad de la lista
-  bool _mostrarLista = false;
+
+  // Función para normalizar cadenas (quitar acentos, convertir a minúsculas, reemplazar guiones por espacios, y múltiples espacios por uno solo)
+  String normalizeString(String text) {
+    text = text.toLowerCase();
+    text = text.replaceAll('á', 'a');
+    text = text.replaceAll('é', 'e');
+    text = text.replaceAll('í', 'i');
+    text = text.replaceAll('ó', 'o');
+    text = text.replaceAll('ú', 'u');
+    text = text.replaceAll('-', ' '); // Reemplazar guiones por espacios
+    text = text.replaceAll(RegExp(r'\s+'), ' '); // Reemplazar múltiples espacios por uno solo
+    return text.trim(); // Eliminar espacios al inicio y al final
+  }
 
   // Verificar si se debe hacer la sincronización (una vez por semana)
   Future<void> checkSync() async {
     final prefs = await SharedPreferences.getInstance();
-    //await prefs.remove('lastSyncDate');
     final lastSyncDate = prefs.getString('lastSyncDate');
     final currentDate = DateTime.now().toString().split(' ')[0]; // Solo fecha (YYYY-MM-DD)
 
@@ -46,6 +56,8 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
+        final data = json.decode(response.body) as List;
+
         // Guardamos los datos localmente
         await saveDataLocally(response.body);
         print("listo");
@@ -71,15 +83,22 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
   Future<void> loadLocalData() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/plantas.json');
-    
+
     if (await file.exists()) {
       final data = await file.readAsString();
       setState(() {
         plantas = (json.decode(data) as List).map((json) => Plants.fromJson(json)).toList();
-        // Al cargar los datos, NO inicializamos plantasFiltradas aquí
-        // Se inicializará cuando se haga la primera búsqueda.
+        // Recolectar y normalizar efectos disponibles
+        efectosDisponibles.clear();
+        for (var planta in plantas) {
+          if (planta.efectos != null) {
+            for (var efecto in planta.efectos!) {
+              efectosDisponibles.add(normalizeString(efecto));
+            }
+          }
+        }
       });
-      print("data cargada");
+      print("data cargada y efectos recolectados");
     } else {
       print("No se encontraron datos locales.");
       showErrorMessage(); // Mostrar mensaje si no hay datos locales
@@ -105,59 +124,80 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
     );
   }
 
+  // Función para mostrar la lista de efectos disponibles
+  void _showEfectosList() {
+    // Convertir el Set a una lista y ordenar alfabéticamente
+    List<String> sortedEfectos = efectosDisponibles.toList()..sort();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Efectos Disponibles"),
+        content: SizedBox( // Usa SizedBox para limitar la altura del contenido
+          height: MediaQuery.of(context).size.height * 0.3, // Aproximadamente el 40% de la altura de la pantalla
+          width: MediaQuery.of(context).size.width * 0.7, // Aproximadamente el 70% del ancho de la pantalla
+          child: ListView.builder( // Cambia ListBody por ListView.builder para un mejor manejo de scroll y rendimiento
+            shrinkWrap: true, // Esto es importante para que el ListView ocupe solo el espacio necesario dentro del SizedBox
+            itemCount: sortedEfectos.length,
+            itemBuilder: (context, index) {
+              final efecto = sortedEfectos[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 6, right: 8),
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(efecto),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        actions: <Widget>[
+          Center(
+            child: TextButton(
+              child: const Text("Cerrar"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     checkSync(); // Verificar y sincronizar al iniciar
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   void filtrarPlantas(String query) {
     setState(() {
       busqueda = query;
       selectedIndex = null; // Resetear selección al escribir
-      
-      // Si la búsqueda no está vacía, mostramos la lista y filtramos
-      if (query.isNotEmpty) {
-        _mostrarLista = true; // Mostrar la lista al escribir
+      if (query.isEmpty) {
+        plantasFiltradas = [];
+      } else {
+        final normalizedQuery = normalizeString(query); // Normalizar la query de búsqueda
         plantasFiltradas = plantas.where((planta) {
-          final nombreCompleto =
-              "${planta.nombreComun ?? ''} ${planta.nombreCientifico ?? ''}".toLowerCase();
-          return nombreCompleto.contains(query.toLowerCase());
+          return planta.efectos != null &&
+              planta.efectos!.any((efecto) => normalizeString(efecto).contains(normalizedQuery));
         }).toList();
         plantasFiltradas.sort((a, b) => a.nombreComun!.compareTo(b.nombreComun!));
-      } else {
-        // Si el query está vacío, no se debe mostrar la lista por el momento
-        // Solo se mostrará si se presiona el botón de búsqueda
-        plantasFiltradas = []; // Vaciar la lista filtrada cuando el query es vacío
-        _mostrarLista = false; // Ocultar la lista
       }
-    });
-  }
-
-  // Función para manejar la búsqueda al presionar el icono
-  void _handleSearchIconPressed() {
-    setState(() {
-      if (_mostrarLista) {
-        // Si la lista está visible, la ocultamos y limpiamos la búsqueda
-        _mostrarLista = false;
-        _searchController.clear();
-        busqueda = "";
-        plantasFiltradas = []; // Vaciar la lista filtrada
-      } else {
-        // Si la lista está oculta, la mostramos con todas las plantas
-        _mostrarLista = true;
-        _searchController.clear(); // Asegúrate de que el campo esté vacío
-        busqueda = "";
-        plantas.sort((a, b) => a.nombreComun!.compareTo(b.nombreComun!));
-        plantasFiltradas = plantas; // Mostrar todas las plantas
-      }
-      selectedIndex = null; // Reinicia la selección en ambos casos
     });
   }
 
@@ -188,7 +228,7 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 60),
-                // Título decorativo
+                // Título decorativo para búsqueda por efecto
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                   decoration: BoxDecoration(
@@ -200,12 +240,12 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Image.asset(
-                        'assets/icons/buscar_nombre_icon.png',
+                        'assets/icons/buscar_efecto_icon.png', // Asegúrate de tener este ícono o usa uno genérico
                         height: 70,
                       ),
                       const SizedBox(width: 10),
                       const Text(
-                        "Buscar por\nNombre",
+                        "Buscar por\nEfecto",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 18,
@@ -218,50 +258,52 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // Input de búsqueda
-                Container(
-                  width: 300,
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFAED189),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.6),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                // Fila para el input de búsqueda y el botón de información
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 300,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFAED189),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.6), // Sombra suave
+                            blurRadius: 8, // Radio de difuminado de la sombra
+                            offset: const Offset(0, 4), // Desplazamiento de la sombra
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (query) {
-                      // Solo filtra si hay texto. Si se borra, no se muestra nada.
-                      // La lista completa solo se mostrará al presionar el icono de búsqueda.
-                      filtrarPlantas(query);
-                    },
-                    style: const TextStyle(fontSize: 17),
-                    decoration: InputDecoration(
-                      hintText: "Ingresa un nombre",
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: _handleSearchIconPressed, // Llama a la nueva función
+                      child: TextField(
+                        onChanged: filtrarPlantas,
+                        style: const TextStyle(fontSize: 17),
+                        decoration: const InputDecoration(
+                          hintText: "Ingresa un efecto",
+                          border: InputBorder.none,
+                          suffixIcon: Icon(Icons.search),
+                          contentPadding: EdgeInsets.only(left: 20, top: 9, bottom: 10),
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.only(left: 20, top: 9, bottom: 10),
                     ),
-                  ),
+                    const SizedBox(width: 0), // Espacio entre el input y el botón
+                    IconButton(
+                      icon: const Icon(Icons.info_outline, size: 30),
+                      color: const Color(0xFF3D813A),
+                      onPressed: _showEfectosList,
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 1),
 
                 // Lista de resultados filtrados (justo debajo del buscador)
-                // Solo se muestra si _mostrarLista es true
-                if (_mostrarLista)
-                  plantasFiltradas.isEmpty && busqueda.isNotEmpty
+                if (busqueda.isNotEmpty)
+                  plantasFiltradas.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.only(top: 20),
-                          child: Text("No se encontraron plantas"),
+                          child: Text("No se encontraron plantas con ese efecto"),
                         )
                       : Container(
                           width: 300,
