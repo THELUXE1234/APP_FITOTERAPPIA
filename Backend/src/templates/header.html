@@ -1,0 +1,33 @@
+<header class="p-1 mb-4 border-bottom bg-white shadow-sm">
+  <div class="container d-flex justify-content-between align-items-center">
+
+    <!-- Logo -->
+    <a href="/" class="d-flex align-items-center text-decoration-none">
+      <img src="{{ url_for('static', filename='img/logo_menu.png') }}" alt="Logo" class="logo-img me-4" height="40">
+    </a>
+
+    <!-- Enlaces de navegación -->
+    <nav class="me-auto">
+      <ul class="nav">
+        <li class="nav-item"><a class="nav-link text-dark" href="{{ url_for('admin.listar_plantas') }}">Ver plantas</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="{{ url_for('admin.create_plant_form') }}">Crear planta</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="{{ url_for('admin.listar_videos') }}">Videoteca</a></li>
+      </ul>
+    </nav>
+
+    <!-- Usuario -->
+    <div class="dropdown text-end">
+      <a href="#" class="d-block text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <div style="width: 16px; height: 16px; background-color: #28a745; border-radius: 50%; display: inline-block;"></div>
+        <span class="ms-2">{{ username }}</span>
+      </a>
+      <ul class="dropdown-menu text-small">
+        <li><a class="dropdown-item" href="#">Perfil</a></li>
+        <li><a class="dropdown-item" href="#">Configuración</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{{ url_for('admin.logout_admin') }}">Cerrar sesión</a></li>
+      </ul>
+    </div>
+
+  </div>
+</header>

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <center><h2>Crear Nueva Planta Medicinal</h2></center>
+    <hr>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="image-container">
+            <!-- Imagen principal -->
+            <label class="image-box main-image">
+                <span class="placeholder-text">Haz clic para subir imagen principal</span>
+                <img class="preview-img" style="display:none;" />
+                <input type="file" name="main_image" accept="image/*" style="display: none;">
+            </label>
+
+            <!-- Imágenes secundarias -->
+            <div class="side-images">
+                {% for i in range(3) %}
+                <label class="image-box side-image">
+                    <span class="placeholder-text">Subir imagen {{ i + 1 }}</span>
+                    <img class="preview-img" style="display:none;" />
+                    <input type="file" name="side_image_{{ i+1 }}" accept="image/*" style="display: none;">
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <hr>
+
+        <label for="nombre_comun">Nombre común</label>
+        <input id="nombre_comun" name="nombre_comun" class="form-control mb-2">
+
+        <label for="nombre_cientifico">Nombre científico</label>
+        <input id="nombre_cientifico" name="nombre_cientifico" class="form-control mb-2">
+
+        <label for="descripcion">Descripción general</label>
+        <textarea id="descripcion" name="descripcion" class="form-control mb-2"></textarea>
+
+        <label for="instrucciones_de_cultivo">Instrucciones de cultivo</label>
+        <textarea id="instrucciones_de_cultivo" name="instrucciones_de_cultivo" class="form-control mb-2"></textarea>
+
+        <label for="cuidado_y_cosecha">Cuidado y cosecha</label>
+        <textarea id="cuidado_y_cosecha" name="cuidado_y_cosecha" class="form-control mb-2"></textarea>
+
+        <label for="usos_tradicionales">Usos tradicionales (separar por salto de línea)</label>
+        <textarea id="usos_tradicionales" name="usos_tradicionales" class="form-control mb-2"></textarea>
+
+        <label for="infusiones">Infusiones (separar por salto de línea)</label>
+        <textarea id="infusiones" name="infusiones" class="form-control mb-2"></textarea>
+
+        <label for="efectos">Efectos (separar por salto de línea)</label>
+        <textarea id="efectos" name="efectos" class="form-control mb-2"></textarea>
+
+        <label for="Definicion_efectos">Definición de efectos (separar por salto de línea)</label>
+        <textarea id="Definicion_efectos" name="Definicion_efectos" class="form-control mb-2"></textarea>
+
+        <label for="precauciones">Precauciones</label>
+        <textarea id="precauciones" name="precauciones" class="form-control mb-2"></textarea>
+
+        <label for="otros_antecedentes">Otros antecedentes</label>
+        <textarea id="otros_antecedentes" name="otros_antecedentes" class="form-control mb-2"></textarea>
+
+        <label for="tipo_de_planta">Tipo de planta</label>
+        <input id="tipo_de_planta" name="tipo_de_planta" class="form-control mb-2">
+
+        <label for="altura">Altura</label>
+        <input id="altura" name="altura" class="form-control mb-2">
+
+        <label for="hojas">Hojas</label>
+        <input id="hojas" name="hojas" class="form-control mb-2">
+
+        <label for="flores">Flores</label>
+        <input id="flores" name="flores" class="form-control mb-2">
+
+        <label for="periodo_de_vida">Periodo de vida</label>
+        <input id="periodo_de_vida" name="periodo_de_vida" class="form-control mb-2">
+
+        <label for="temperatura_ideal">Temperatura ideal</label>
+        <input id="temperatura_ideal" name="temperatura_ideal" class="form-control mb-2">
+
+        <label for="exposicion_solar">Exposición solar</label>
+        <input id="exposicion_solar" name="exposicion_solar" class="form-control mb-2">
+
+        <label for="suelo">Suelo</label>
+        <input id="suelo" name="suelo" class="form-control mb-2">
+
+        <label for="propagacion">Propagación</label>
+        <input id="propagacion" name="propagacion" class="form-control mb-2">
+
+        <label for="riego">Riego</label>
+        <input id="riego" name="riego" class="form-control mb-2">
+
+        <label for="cosecha">Cosecha</label>
+        <input id="cosecha" name="cosecha" class="form-control mb-2">
+
+        <button type="submit" class="btn btn-success">Crear Planta</button>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/preview_imagen.js') }}"></script>
+{% endblock %}

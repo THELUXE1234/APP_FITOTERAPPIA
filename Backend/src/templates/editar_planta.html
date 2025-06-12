@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <center><h2>Editar Planta Medicinal: {{ planta.nombre_comun }}</h2></center>
+    <hr>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="image-container">
+            <!-- Imagen principal -->
+            <label class="image-box main-image">
+                {% if main_image %}
+                <img src="{{ url_for('static', filename='img/' ~ main_image) }}" alt="Imagen Principal">
+                {% else %}
+                <span>Haz clic para subir imagen principal</span>
+                {% endif %}
+                <input type="file" name="main_image" style="display: none;" onchange="this.form.submit()">
+            </label>
+        
+            <!-- Imágenes secundarias -->
+            <div class="side-images">
+                {% for i in range(3) %}
+                <label class="image-box side-image">
+                    {% if side_images[i] %}
+                    <img src="{{ url_for('static', filename='img/' ~ side_images[i]) }}" alt="Imagen {{ i + 1 }}">
+                    {% else %}
+                    <span>Subir imagen {{ i + 1 }}</span>
+                    {% endif %}
+                    <input type="file" name="side_image_{{ i+1 }}" style="display: none;" onchange="this.form.submit()">
+                </label>
+                {% endfor %}
+            </div>
+    
+        </div>
+
+        <hr>
+
+        <label for="nombre_comun">Nombre común</label>
+        <input id="nombre_comun" name="nombre_comun" value="{{ planta.nombre_comun }}" class="form-control mb-2">
+
+        <label for="nombre_cientifico">Nombre científico</label>
+        <input id="nombre_cientifico" name="nombre_cientifico" value="{{ planta.nombre_cientifico }}" class="form-control mb-2">
+
+        <label for="descripcion">Descripción general</label>
+        <textarea id="descripcion" name="descripcion" class="form-control mb-2">{{ planta.descripcion }}</textarea>
+
+        <label for="instrucciones_de_cultivo">Instrucciones de cultivo</label>
+        <textarea id="instrucciones_de_cultivo" name="instrucciones_de_cultivo" class="form-control mb-2">{{ planta.instrucciones_de_cultivo }}</textarea>
+
+        <label for="cuidado_y_cosecha">Cuidado y cosecha</label>
+        <textarea id="cuidado_y_cosecha" name="cuidado_y_cosecha" class="form-control mb-2">{{ planta.cuidado_y_cosecha }}</textarea>
+
+        <label for="usos_tradicionales">Usos tradicionales (separar por salto de línea)</label>
+        <textarea id="usos_tradicionales" name="usos_tradicionales" class="form-control mb-2">{% for uso in planta.usos_tradicionales %}{{ uso }}{% if not loop.last %}&#10;{% endif %}{% endfor %}</textarea>
+
+        <label for="infusiones">Infusiones (separar por salto de línea)</label>
+        <textarea id="infusiones" name="infusiones" class="form-control mb-2">{% for inf in planta.infusiones %}{{ inf }}{% if not loop.last %}&#10;{% endif %}{% endfor %}</textarea>
+
+        <label for="efectos">Efectos (separar por salto de línea)</label>
+        <textarea id="efectos" name="efectos" class="form-control mb-2">{% for ef in planta.efectos %}{{ ef }}{% if not loop.last %}&#10;{% endif %}{% endfor %}</textarea>
+
+        <label for="Definicion_efectos">Definición de efectos (separar por salto de línea)</label>
+        <textarea id="Definicion_efectos" name="Definicion_efectos" class="form-control mb-2">{% for defef in planta.Definicion_efectos %}{{ defef }}{% if not loop.last %}&#10;{% endif %}{% endfor %}</textarea>
+
+        <label for="precauciones">Precauciones</label>
+        <textarea id="precauciones" name="precauciones" class="form-control mb-2">{{ planta.precauciones }}</textarea>
+
+        <label for="otros_antecedentes">Otros antecedentes</label>
+        <textarea id="otros_antecedentes" name="otros_antecedentes" class="form-control mb-2">{{ planta.otros_antecedentes }}</textarea>
+
+        <label for="tipo_de_planta">Tipo de planta</label>
+        <input id="tipo_de_planta" name="tipo_de_planta" value="{{ planta.tipo_de_planta }}" class="form-control mb-2">
+
+        <label for="altura">Altura</label>
+        <input id="altura" name="altura" value="{{ planta.altura }}" class="form-control mb-2">
+
+        <label for="hojas">Hojas</label>
+        <input id="hojas" name="hojas" value="{{ planta.hojas }}" class="form-control mb-2">
+
+        <label for="flores">Flores</label>
+        <input id="flores" name="flores" value="{{ planta.flores }}" class="form-control mb-2">
+
+        <label for="periodo_de_vida">Periodo de vida</label>
+        <input id="periodo_de_vida" name="periodo_de_vida" value="{{ planta.periodo_de_vida }}" class="form-control mb-2">
+
+        <label for="temperatura_ideal">Temperatura ideal</label>
+        <input id="temperatura_ideal" name="temperatura_ideal" value="{{ planta.temperatura_ideal }}" class="form-control mb-2">
+
+        <label for="exposicion_solar">Exposición solar</label>
+        <input id="exposicion_solar" name="exposicion_solar" value="{{ planta.exposicion_solar }}" class="form-control mb-2">
+
+        <label for="suelo">Suelo</label>
+        <input id="suelo" name="suelo" value="{{ planta.suelo }}" class="form-control mb-2">
+
+        <label for="propagacion">Propagación</label>
+        <input id="propagacion" name="propagacion" value="{{ planta.propagacion }}" class="form-control mb-2">
+
+        <label for="riego">Riego</label>
+        <input id="riego" name="riego" value="{{ planta.riego }}" class="form-control mb-2">
+
+        <label for="cosecha">Cosecha</label>
+        <input id="cosecha" name="cosecha" value="{{ planta.cosecha }}" class="form-control mb-2">
+
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+</div>
+
+{% endblock %}
