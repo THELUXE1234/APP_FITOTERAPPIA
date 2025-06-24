@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Término del Glosario</h2>
+    <hr>
+    <form method="POST" action="{{ url_for('admin.edit_glosario_term', id=term._id) }}">
+        <div class="mb-3">
+            <label for="category" class="form-label">Categoría:</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="">Selecciona una categoría</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if cat == term.category %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="term" class="form-label">Término:</label>
+            <input type="text" class="form-control" id="term" name="term" value="{{ term.term }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="definition" class="form-label">Definición:</label>
+            <textarea class="form-control" id="definition" name="definition" rows="5" required>{{ term.definition }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('admin.listar_glosario') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,8 +1,69 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h2>Lista de Videos</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Listado de Videos</h2>
+        <a href="{{ url_for('admin.create_video_form') }}" class="btn btn-success">Agregar Nuevo Video</a>
+    </div>
+    <hr>
 
+
+    {% if videos %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="tablaVideos">
+            <thead class="table-success">
+                <tr>
+                    <th>#</th>
+                    <th>Enlace</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for video in videos|sort(attribute='title') %}
+                <tr>
+                    <td class="numero"></td> 
+                    <td><a href="{{ video.link }}" target="_blank" class="text-decoration-none">{{ video.link | truncate(50, True) }}</a></td>
+                    <td>
+                        <a href="#" class="btn btn-danger btn-sm" onclick="confirmarEliminacionVideo('{{ video._id }}', 'Video_titulo')">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        No hay videos guardados. ¡Agrega uno!
+    </div>
+    {% endif %}
 </div>
+
+<script>
+    // Script para numerar filas (opcional, similar a listar_plantas.js)
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.getElementById('tablaVideos');
+        if (table) {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const numeroCell = row.querySelector('.numero');
+                if (numeroCell) {
+                    numeroCell.textContent = index + 1;
+                }
+            });
+        }
+    });
+
+    function confirmarEliminacionVideo(videoId, videoTitle) {
+        if (confirm(`¿Estás seguro de que deseas eliminar el video "${videoTitle}"?`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/eliminar_video/${videoId}`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+
+</script>
 {% endblock %}

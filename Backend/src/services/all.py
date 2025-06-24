@@ -53,3 +53,12 @@ def create_plants_dataset():
         return Response("Error al insertar los datos en MongoDB", status=400)
 
 
+def get_videos_services():
+    data = mongo.db.videos.find()
+    result = json_util.dumps(data)
+    return Response(result, mimetype='application/json')
+
+def get_glosario_services():
+    data = mongo.db.glosario.find()
+    result = json_util.dumps(data)
+    return Response(result, mimetype='application/json')

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Agregar Nuevo Video</h2>
+    <hr>
+    <form method="POST" action="{{ url_for('admin.create_video_form') }}">
+        <div class="mb-3">
+            <label for="link" class="form-label">Enlace de YouTube:</label>
+            <input type="url" class="form-control" id="link" name="link" placeholder="Ej: https://www.youtube.com/watch?v=dQw4w9WgXcQ" required>
+            <small class="form-text text-muted">Ingresa el enlace completo del video de YouTube. El título y el autor se obtendrán automáticamente.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar Video</button>
+        <a href="{{ url_for('admin.listar_videos') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

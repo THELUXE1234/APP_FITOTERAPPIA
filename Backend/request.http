@@ -1,6 +1,8 @@
-#GET http://127.0.0.1:3000/api/plantas
+#GET http://127.0.0.1:5000/api/videos
 
-GET http://127.0.0.1:3000/api/plantas/create
+GET http://127.0.0.1:5000/api/glosario
+
+#GET http://127.0.0.1:3000/api/plantas/create
 
 
 

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4" id="listar_glosario_container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Listado del Glosario</h2>
+        <a href="{{ url_for('admin.create_glosario_term') }}" class="btn btn-success">Agregar Nuevo Término</a>
+
+    </div>
+    <hr>
+
+    {% if grouped_terms %}
+        {% for category, terms in grouped_terms.items() %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">{{ category }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Término</th>
+                                    <th>Definición</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for term in terms %}
+                                <tr>
+                                    <td class="numero"></td>
+                                    <td><strong>{{ term.term }}</strong></td>
+                                    <td>{{ term.definition }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.edit_glosario_term', id=term._id) }}" class="btn btn-warning btn-sm">Editar</a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmarEliminacionTermino('{{ term._id }}', '{{ term.term }}')">Eliminar</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        No hay términos en el glosario. ¡Agrega uno!
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Numerar filas dentro de cada tabla de categoría
+        const tables = document.querySelectorAll('#listar_glosario_container table'); // Asegúrate de que haya un ID o clase para englobar
+        tables.forEach(table => {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const numeroCell = row.querySelector('.numero');
+                if (numeroCell) {
+                    numeroCell.textContent = index + 1;
+                }
+            });
+        });
+    });
+
+
+
+    function confirmarEliminacionTermino(termId, termName) {
+        if (confirm(`¿Estás seguro de que deseas eliminar el término "${termName}" del glosario?`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/eliminar_termino_glosario/${termId}`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+</script>
+{% endblock %}

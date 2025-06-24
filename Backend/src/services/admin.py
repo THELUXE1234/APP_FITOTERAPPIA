@@ -294,3 +294,201 @@ def listar_videos_service():
 
     videos = list(mongo.db.videos.find())
     return render_template('listar_videos.html', videos=videos, username=session.get("admin_username"))
+
+def create_video_service():
+    """
+    Maneja la creación de un nuevo video.
+    Recibe el link de YouTube, extrae título y autor, y guarda en MongoDB.
+    """
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder a esta página.")
+        return redirect(url_for('admin.login_admin'))
+
+    if request.method == 'POST':
+        video_link = request.form['link'].strip()
+        if not video_link:
+            flash('El enlace del video no puede estar vacío.', 'error')
+            return redirect(url_for('admin.create_video_form'))
+
+        # Validar si el link ya existe
+        existing_video = mongo.db.videos.find_one({'link': video_link})
+        if existing_video:
+            flash('Este video ya ha sido agregado.', 'warning')
+            return redirect(url_for('admin.create_video_form'))
+
+        # youtube_info = get_youtube_info(video_link)
+        youtube_info = True
+        if youtube_info:
+            video_data = {
+                'link': video_link,
+                # 'title': youtube_info.get('title', 'Título no disponible'),
+                # 'author': youtube_info.get('uploader', 'Autor no disponible')
+            }
+            print(video_data.get('link'))
+            mongo.db.videos.insert_one(video_data)
+            flash('Video agregado exitosamente.', 'success')
+            return redirect(url_for('admin.listar_videos'))
+        else:
+            flash('No se pudo obtener la información del video. Verifica el enlace.', 'error')
+            return redirect(url_for('admin.create_video_form'))
+
+    return render_template('nuevo_video.html', username=session.get("admin_username"))
+
+def delete_video_service(video_id):
+    """
+    Elimina un video de la base de datos.
+    """
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder a esta acción.", 'error')
+        return redirect(url_for('admin.login_admin'))
+
+    video = mongo.db.videos.find_one({"_id": ObjectId(video_id)})
+    if not video:
+        flash("No se encontró el video.", 'error')
+        return redirect(url_for('admin.listar_videos'))
+
+    result = mongo.db.videos.delete_one({"_id": ObjectId(video_id)})
+
+    if result.deleted_count == 1:
+        flash("Video eliminado exitosamente.", 'success')
+    else:
+        flash("No se pudo eliminar el video. Verifica el ID.", 'error')
+    return redirect(url_for('admin.listar_videos'))
+
+def listar_glosario_service():
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder.")
+        return redirect(url_for('admin.login_admin'))
+
+    terms = list(mongo.db.glosario.find().sort([("category", 1), ("term", 1)]))
+    
+    # Agrupar términos por categoría para una mejor visualización si es necesario en la plantilla
+    grouped_terms = {}
+    for term_data in terms:
+        category = term_data.get('category')
+        if category not in grouped_terms:
+            grouped_terms[category] = []
+        grouped_terms[category].append(term_data)
+    return render_template('listar_glosario.html', grouped_terms=grouped_terms, username=session.get("admin_username"))
+
+def create_glosario_term_service():
+    """
+    Maneja la creación de un nuevo término del glosario.
+    """
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder a esta página.")
+        return redirect(url_for('admin.login_admin'))
+
+    if request.method == 'POST':
+        category = request.form['category'].strip()
+        term = request.form['term'].strip()
+        definition = request.form['definition'].strip()
+
+        if not category or not term or not definition:
+            flash('Todos los campos son obligatorios.', 'error')
+            return redirect(url_for('admin.create_glosario_term'))
+
+        # Opcional: Validar si el término ya existe en la misma categoría
+        existing_term = mongo.db.glosario.find_one({'category': category, 'term': term})
+        if existing_term:
+            flash(f'El término "{term}" ya existe en la categoría "{category}".', 'warning')
+            return redirect(url_for('admin.create_glosario_term'))
+
+        glossary_data = {
+            'category': category,
+            'term': term,
+            'definition': definition
+        }
+        mongo.db.glosario.insert_one(glossary_data)
+        flash('Término del glosario agregado exitosamente.', 'success')
+        return redirect(url_for('admin.listar_glosario'))
+
+    categories = [
+        "Propiedades Terapéuticas",
+        "Preparaciones",
+        "Condiciones de Salud",
+        "Términos agronómicos y botánicos"
+    ]
+    return render_template('nuevo_termino_glosario.html', username=session.get("admin_username"), categories=categories)
+
+def delete_glosario_term_service(term_id):
+    """
+    Elimina un término del glosario de la base de datos.
+    """
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder a esta acción.", 'error')
+        return redirect(url_for('admin.login_admin'))
+
+    term_data = mongo.db.glosario.find_one({"_id": ObjectId(term_id)})
+    if not term_data:
+        flash("No se encontró el término del glosario.", 'error')
+        return redirect(url_for('admin.listar_glosario_terms'))
+
+    result = mongo.db.glosario.delete_one({"_id": ObjectId(term_id)})
+
+    if result.deleted_count == 1:
+        flash("Término del glosario eliminado exitosamente.", 'success')
+    else:
+        flash("No se pudo eliminar el término del glosario. Verifica el ID.", 'error')
+    return redirect(url_for('admin.listar_glosario'))
+
+
+
+def edit_glosario_term_service():
+    """
+    Maneja la edición de un término del glosario existente.
+    """
+    if 'admin_id' not in session:
+        flash("Debe iniciar sesión para acceder a esta página.")
+        return redirect(url_for('admin.login_admin'))
+
+    term_id = request.args.get('id')
+    if not term_id:
+        flash("ID de término no especificado.", 'error')
+        return redirect(url_for('admin.listar_glosario'))
+
+    term_data = mongo.db.glosario.find_one({'_id': ObjectId(term_id)})
+    if not term_data:
+        flash("Término no encontrado.", 'error')
+        return redirect(url_for('admin.listar_glosario'))
+
+    if request.method == 'POST':
+        new_category = request.form['category'].strip()
+        new_term = request.form['term'].strip()
+        new_definition = request.form['definition'].strip()
+
+        if not new_category or not new_term or not new_definition:
+            flash('Todos los campos son obligatorios.', 'error')
+            return redirect(url_for('admin.edit_glosario_term', id=term_id))
+
+        # Opcional: Validar si el término ya existe con la nueva categoría/término para otro ID
+        existing_term_with_new_data = mongo.db.glossary.find_one(
+            {'category': new_category, 'term': new_term, '_id': {'$ne': ObjectId(term_id)}}
+        )
+        if existing_term_with_new_data:
+            flash(f'El término "{new_term}" ya existe en la categoría "{new_category}" con otro ID.', 'warning')
+            return redirect(url_for('admin.edit_glosario_term', id=term_id))
+
+        updated_data = {
+            'category': new_category,
+            'term': new_term,
+            'definition': new_definition
+        }
+
+        result = mongo.db.glosario.update_one(
+            {'_id': ObjectId(term_id)},
+            {'$set': updated_data}
+        )
+        if result.modified_count == 1:
+            flash('Término del glosario actualizado exitosamente.', 'success')
+        else:
+            flash('No se realizaron cambios en el término.', 'info')
+        return redirect(url_for('admin.listar_glosario'))
+
+    categories = [
+        "Propiedades Terapéuticas",
+        "Preparaciones",
+        "Condiciones de Salud",
+        "Términos agronómicos y botánicos"
+    ]
+    return render_template('editar_termino_glosario.html', term=term_data, username=session.get("admin_username"), categories=categories)
