@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_fitoterappia/providers/plant_provider.dart';
 import 'package:diacritic/diacritic.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DetallePlantaScreen extends StatelessWidget {
   final Plants planta;
@@ -70,6 +72,8 @@ class DetallePlantaScreen extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PlantProvider>().planta = planta; // Guardamos la planta en el provider
     });
+
+    String baseUrl = dotenv.env['FLASK_IMAGE_URL']!;
     return Scaffold(
       backgroundColor: const Color(0xFFF0F9E3),
       appBar: CustomAppBarNoImageWithBackground(
@@ -135,11 +139,14 @@ class DetallePlantaScreen extends StatelessWidget {
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/images/${_getImageName(planta.nombreComun)}.jpg',
+                      child: CachedNetworkImage(
+                        imageUrl: '$baseUrl${_getImageName(planta.nombreComun)}.jpg',
                         height: 350,
                         width: 197,
                         fit: BoxFit.cover,
+                        progressIndicatorBuilder: (context, url, downloadProgress) => 
+                                  CircularProgressIndicator(value: downloadProgress.progress),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
                       ),
                     ),
                   ),

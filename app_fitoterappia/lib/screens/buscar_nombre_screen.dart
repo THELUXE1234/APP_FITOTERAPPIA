@@ -27,7 +27,7 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
   // Verificar si se debe hacer la sincronización (una vez por semana)
   Future<void> checkSync() async {
     final prefs = await SharedPreferences.getInstance();
-    //await prefs.remove('lastSyncDate');
+    await prefs.remove('lastSyncDate');
     final lastSyncDate = prefs.getString('lastSyncDate');
     final currentDate = DateTime.now().toString().split(' ')[0]; // Solo fecha (YYYY-MM-DD)
 
@@ -40,7 +40,8 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
   // Sincronizar datos desde la API
   Future<void> syncData() async {
     final apiUrl = dotenv.env['API_URL'];
-    final uri = Uri.parse(apiUrl!);
+    final uri = Uri.parse('$apiUrl/plantas');
+
 
     try {
       final response = await http.get(uri);
