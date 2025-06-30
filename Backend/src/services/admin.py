@@ -5,6 +5,90 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
 
+# Importaciones para la API de YouTube
+from googleapiclient.discovery import build
+import re
+from urllib.parse import urlparse, parse_qs
+
+# Importa load_dotenv
+from dotenv import load_dotenv
+
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
+
+# --- Configuración de la API de YouTube ---
+# Obtén la API Key de las variables de entorno
+API_KEY = os.getenv("YOUTUBE_API_KEY")
+
+def extract_video_id(youtube_url):
+    """
+    Extrae el ID del video desde una URL de YouTube (normal o short).
+    """
+    try:
+        # Expresiones regulares para diferentes formatos de URL de YouTube
+        video_id_match = re.search(
+            r"(?:https?://)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)/(?:watch\?v=|embed/|v/|shorts/|)([\w-]{11})(?:\S+)?",
+            youtube_url
+        )
+        if video_id_match:
+            return video_id_match.group(1)
+        
+        # Casos específicos para URL con shorts o live
+        parsed_url = urlparse(youtube_url)
+        if "youtube.com" in parsed_url.netloc or "youtu.be" in parsed_url.netloc:
+            if "/shorts/" in parsed_url.path:
+                return parsed_url.path.split("/shorts/")[1].split("/")[0]
+            query_params = parse_qs(parsed_url.query)
+            if "v" in query_params:
+                return query_params["v"][0]
+            if parsed_url.netloc == "youtu.be":
+                return parsed_url.path[1:]
+
+    except Exception as e:
+        print(f"Error al extraer el ID del video: {e}")
+
+    print(f"URL no válida o no se pudo extraer el ID para: {youtube_url}")
+    return None
+
+def get_video_info_from_youtube_api(video_id):
+    """
+    Obtiene el título y el autor de un video de YouTube usando la API de YouTube Data v3.
+    """
+    if not video_id:
+        return None, None
+
+    # Verifica si la API_KEY está disponible antes de construir el servicio
+    if not API_KEY:
+        print("API_KEY no está configurada, no se puede obtener información del video.")
+        return None, None
+
+    try:
+        youtube = build(
+            'youtube',
+            'v3',
+            developerKey=API_KEY
+        )
+
+        request = youtube.videos().list(
+            part="snippet",
+            id=video_id
+        )
+        response = request.execute()
+
+        if response and response.get('items'):
+            video_data = response['items'][0]['snippet']
+            video_title = video_data.get('title', 'Título no disponible')
+            author_name = video_data.get('channelTitle', 'Autor no disponible')
+            return video_title, author_name
+        else:
+            print(f"No se encontró información para el video con ID: {video_id}")
+            return None, None
+
+    except Exception as e:
+        print(f"Ocurrió un error al usar la API de YouTube: {e}")
+        return None, None
+
+
 def extraer_lista_desde_textarea(texto):
     """Convierte un texto con saltos de línea en una lista, eliminando elementos vacíos."""
     if texto:
@@ -316,21 +400,27 @@ def create_video_service():
             flash('Este video ya ha sido agregado.', 'warning')
             return redirect(url_for('admin.create_video_form'))
 
-        # youtube_info = get_youtube_info(video_link)
-        youtube_info = True
-        if youtube_info:
-            video_data = {
-                'link': video_link,
-                # 'title': youtube_info.get('title', 'Título no disponible'),
-                # 'author': youtube_info.get('uploader', 'Autor no disponible')
-            }
-            print(video_data.get('link'))
-            mongo.db.videos.insert_one(video_data)
-            flash('Video agregado exitosamente.', 'success')
-            return redirect(url_for('admin.listar_videos'))
-        else:
-            flash('No se pudo obtener la información del video. Verifica el enlace.', 'error')
-            return redirect(url_for('admin.create_video_form'))
+        # Paso 1: Extraer el ID del video de la URL
+        video_id = extract_video_id(video_link)
+
+        if video_id:
+            # Paso 2: Obtener el título y el autor usando la API de YouTube
+            video_title, author_name = get_video_info_from_youtube_api(video_id)
+
+            if video_title and author_name:
+                print(video_title)
+                print(author_name)
+                video_data = {
+                    'link': video_link,
+                    'title': video_title,
+                    'author': author_name,
+                }
+                mongo.db.videos.insert_one(video_data)
+                flash('Video agregado exitosamente.', 'success')
+                return redirect(url_for('admin.listar_videos'))
+            else:
+                flash('No se pudo obtener la información del video (título/autor). Verifica el enlace o la API Key.', 'error')
+                return redirect(url_for('admin.create_video_form'))
 
     return render_template('nuevo_video.html', username=session.get("admin_username"))
 

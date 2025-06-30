@@ -15,6 +15,8 @@
             <thead class="table-success">
                 <tr>
                     <th>#</th>
+                    <th>Título</th> 
+                    <th>Autor</th>  
                     <th>Enlace</th>
                     <th>Acciones</th>
                 </tr>
@@ -23,9 +25,11 @@
                 {% for video in videos|sort(attribute='title') %}
                 <tr>
                     <td class="numero"></td> 
+                    <td>{{ video.title }}</td> 
+                    <td>{{ video.author}}</td>
                     <td><a href="{{ video.link }}" target="_blank" class="text-decoration-none">{{ video.link | truncate(50, True) }}</a></td>
                     <td>
-                        <a href="#" class="btn btn-danger btn-sm" onclick="confirmarEliminacionVideo('{{ video._id }}', 'Video_titulo')">Eliminar</a>
+                        <a href="#" class="btn btn-danger btn-sm" onclick="confirmarEliminacionVideo('{{ video._id }}', '{{video.title}}')">Eliminar</a>
                     </td>
                 </tr>
                 {% endfor %}
