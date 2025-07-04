@@ -18,11 +18,14 @@ class BuscarEfectoScreen extends StatefulWidget {
 class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
   List<Plants> plantas = [];
   List<Plants> plantasFiltradas = [];
-  Set<String> efectosDisponibles = {}; // Conjunto para almacenar efectos únicos
+  Set<String> efectosDisponibles = {};
   String busqueda = "";
   int? selectedIndex;
 
-  // Función para normalizar cadenas (quitar acentos, convertir a minúsculas, reemplazar guiones por espacios, y múltiples espacios por uno solo)
+  final TextEditingController _searchController = TextEditingController();
+
+  bool showInitialMessage = true; // PARA MOSTRAR EL MENSAJE AL ENTRAR
+
   String normalizeString(String text) {
     text = text.toLowerCase();
     text = text.replaceAll('á', 'a');
@@ -30,25 +33,28 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
     text = text.replaceAll('í', 'i');
     text = text.replaceAll('ó', 'o');
     text = text.replaceAll('ú', 'u');
-    text = text.replaceAll('-', ' '); // Reemplazar guiones por espacios
-    text = text.replaceAll(RegExp(r'\s+'), ' '); // Reemplazar múltiples espacios por uno solo
-    return text.trim(); // Eliminar espacios al inicio y al final
+    text = text.replaceAll('-', ' ');
+    text = text.replaceAll(RegExp(r'\s+'), ' ');
+    return text.trim();
   }
 
-  // Verificar si se debe hacer la sincronización (una vez por semana)
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
   Future<void> checkSync() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('lastSyncDate');
     final lastSyncDate = prefs.getString('lastSyncDate');
-    final currentDate = DateTime.now().toString().split(' ')[0]; // Solo fecha (YYYY-MM-DD)
+    final currentDate = DateTime.now().toString().split(' ')[0];
 
     if (lastSyncDate == null || lastSyncDate != currentDate) {
-      await syncData(); // Si es la primera vez o ha pasado más de una semana, sincronizamos
+      await syncData();
     }
     await loadLocalData();
   }
 
-  // Sincronizar datos desde la API
   Future<void> syncData() async {
     final apiUrl = dotenv.env['API_URL'];
     final uri = Uri.parse('$apiUrl/plantas');
@@ -57,12 +63,7 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-
-        // Guardamos los datos localmente
         await saveDataLocally(response.body);
-        print("listo");
-        // Actualizamos la fecha de la última sincronización
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('lastSyncDate', DateTime.now().toString().split(' ')[0]);
       } else {
@@ -73,14 +74,12 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
     }
   }
 
-  // Guardar datos localmente
   Future<void> saveDataLocally(String data) async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/plantas.json');
     await file.writeAsString(data);
   }
 
-  // Cargar datos desde el almacenamiento local
   Future<void> loadLocalData() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/plantas.json');
@@ -89,7 +88,6 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
       final data = await file.readAsString();
       setState(() {
         plantas = (json.decode(data) as List).map((json) => Plants.fromJson(json)).toList();
-        // Recolectar y normalizar efectos disponibles
         efectosDisponibles.clear();
         for (var planta in plantas) {
           if (planta.efectos != null) {
@@ -101,12 +99,10 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
       });
       print("data cargada y efectos recolectados");
     } else {
-      print("No se encontraron datos locales.");
-      showErrorMessage(); // Mostrar mensaje si no hay datos locales
+      showErrorMessage();
     }
   }
 
-  // Mostrar mensaje de error si no hay internet
   void showErrorMessage() {
     showDialog(
       context: context,
@@ -125,41 +121,58 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
     );
   }
 
-  // Función para mostrar la lista de efectos disponibles
   void _showEfectosList() {
-    // Convertir el Set a una lista y ordenar alfabéticamente
     List<String> sortedEfectos = efectosDisponibles.toList()..sort();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Efectos Disponibles"),
-        content: SizedBox( // Usa SizedBox para limitar la altura del contenido
-          height: MediaQuery.of(context).size.height * 0.3, // Aproximadamente el 40% de la altura de la pantalla
-          width: MediaQuery.of(context).size.width * 0.7, // Aproximadamente el 70% del ancho de la pantalla
-          child: ListView.builder( // Cambia ListBody por ListView.builder para un mejor manejo de scroll y rendimiento
-            shrinkWrap: true, // Esto es importante para que el ListView ocupe solo el espacio necesario dentro del SizedBox
+        title: const Text("Selecciona un efecto"),
+        content: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          width: MediaQuery.of(context).size.width * 1,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 150,
+              childAspectRatio: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
             itemCount: sortedEfectos.length,
             itemBuilder: (context, index) {
               final efecto = sortedEfectos[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 6, right: 8),
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.circle,
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    busqueda = efecto;
+                    _searchController.text = efecto;
+                    showInitialMessage = false;
+                  });
+                  filtrarPlantas(efecto);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFAED189),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(2, 2),
                       ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    capitalize(efecto),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                      fontSize: 16,
                     ),
-                    Expanded(
-                      child: Text(efecto),
-                    ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               );
             },
@@ -182,22 +195,30 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
   @override
   void initState() {
     super.initState();
-    checkSync(); // Verificar y sincronizar al iniciar
+    checkSync();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void filtrarPlantas(String query) {
     setState(() {
       busqueda = query;
-      selectedIndex = null; // Resetear selección al escribir
+      selectedIndex = null;
       if (query.isEmpty) {
         plantasFiltradas = [];
+        showInitialMessage = true;
       } else {
-        final normalizedQuery = normalizeString(query); // Normalizar la query de búsqueda
+        final normalizedQuery = normalizeString(query);
         plantasFiltradas = plantas.where((planta) {
           return planta.efectos != null &&
               planta.efectos!.any((efecto) => normalizeString(efecto).contains(normalizedQuery));
         }).toList();
         plantasFiltradas.sort((a, b) => a.nombreComun!.compareTo(b.nombreComun!));
+        showInitialMessage = false;
       }
     });
   }
@@ -229,7 +250,6 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 60),
-                // Título decorativo para búsqueda por efecto
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
                   decoration: BoxDecoration(
@@ -241,7 +261,7 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Image.asset(
-                        'assets/icons/buscar_efecto_icon.png', // Asegúrate de tener este ícono o usa uno genérico
+                        'assets/icons/buscar_efecto_icon.png',
                         height: 70,
                       ),
                       const SizedBox(width: 10),
@@ -259,7 +279,23 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // Fila para el input de búsqueda y el botón de información
+                // --- Mensaje inicial ---
+                if (showInitialMessage)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2F0D9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF3D813A)),
+                    ),
+                    child: const Text(
+                      "Para mayor rapidez, abre el botón y selecciona un efecto.",
+                      style: TextStyle(color: Color(0xFF3D813A), fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -271,13 +307,14 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.6), // Sombra suave
-                            blurRadius: 8, // Radio de difuminado de la sombra
-                            offset: const Offset(0, 4), // Desplazamiento de la sombra
+                            color: Colors.black.withOpacity(0.6),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: TextField(
+                        controller: _searchController,
                         onChanged: filtrarPlantas,
                         style: const TextStyle(fontSize: 17),
                         decoration: const InputDecoration(
@@ -288,7 +325,6 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 0), // Espacio entre el input y el botón
                     IconButton(
                       icon: const Icon(Icons.info_outline, size: 30),
                       color: const Color(0xFF3D813A),
@@ -299,7 +335,6 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
 
                 const SizedBox(height: 1),
 
-                // Lista de resultados filtrados (justo debajo del buscador)
                 if (busqueda.isNotEmpty)
                   plantasFiltradas.isEmpty
                       ? const Padding(
@@ -356,9 +391,7 @@ class _BuscarEfectoScreenState extends State<BuscarEfectoScreen> {
                                     "${planta.nombreComun} ${planta.nombreCientifico ?? ''}",
                                     style: TextStyle(
                                       fontSize: 15,
-                                      color: esSeleccionado
-                                          ? Colors.white
-                                          : Colors.black,
+                                      color: esSeleccionado ? Colors.white : Colors.black,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

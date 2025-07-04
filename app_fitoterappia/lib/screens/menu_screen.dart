@@ -1,6 +1,7 @@
 import 'package:app_fitoterappia/screens/buscar_efecto_screen.dart';
 import 'package:app_fitoterappia/screens/buscar_nombre_screen.dart';
 import 'package:app_fitoterappia/screens/glosario_screen.dart';
+import 'package:app_fitoterappia/screens/juegos_menu_screen.dart';
 import 'package:app_fitoterappia/screens/videoteca_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -60,6 +61,10 @@ class MenuScreen extends StatelessWidget {
         "image": "assets/icons/juegos_icon.png",
         "funcion": () {
           // Aquí puedes redirigir a otra pantalla
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const JuegosMenuScreen()),
+          );
         }
       },
     ];

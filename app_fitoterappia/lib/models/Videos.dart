@@ -9,14 +9,14 @@ String videosToJson(List<Video> data) => json.encode(List<dynamic>.from(data.map
 
 class Video {
   Id? id;
-  String? titulo;
-  String? autor;
+  String? title;
+  String? author;
   String? link;
 
   Video({
     this.id,
-    this.titulo,
-    this.autor,
+    this.title,
+    this.author,
     this.link,
   });
 
@@ -24,8 +24,8 @@ class Video {
   // Es el corazón de la conversión de datos de la API a objetos Dart.
   factory Video.fromJson(Map<String, dynamic> json) => Video(
     id: json["_id"] == null ? null : Id.fromJson(json["_id"]),
-    titulo: json["titulo"], // Si la clave no existe, Dart asignará null.
-    autor: json["autor"],
+    title: json["title"], // Si la clave no existe, Dart asignará null.
+    author: json["author"],
     link: json["link"],
   );
 
@@ -33,8 +33,8 @@ class Video {
   // Útil si necesitaras enviar datos a una API o guardarlos en un formato específico.
   Map<String, dynamic> toJson() => {
     "_id": id?.toJson(),
-    "titulo": titulo,
-    "autor": autor,
+    "title": title,
+    "author": author,
     "link": link,
   };
 }

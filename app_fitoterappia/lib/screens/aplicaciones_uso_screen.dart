@@ -179,7 +179,7 @@ class _AplicacionesUsoScreenState extends State<AplicacionesUsoScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(
-                    'assets/icons/icon_precauciones_seccion.png',
+                    'assets/icons/icon_aplicaciones_seccion.png',
                     height: _iconSize,
                     width: _iconSize,
                     fit: BoxFit.contain,

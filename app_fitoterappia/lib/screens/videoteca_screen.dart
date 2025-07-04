@@ -115,7 +115,7 @@ class _VideotecaScreenState extends State<VideotecaScreen> {
           } else {
             // Opcional: si un video no tiene link válido, puedes decidir qué hacer.
             // Por ahora, simplemente no se añade a la lista de reproductores.
-             print("ID de video inválido o nulo para el título: ${video.titulo}");
+             print("ID de video inválido o nulo para el título: ${video.title}");
           }
         }
         
@@ -174,7 +174,7 @@ class _VideotecaScreenState extends State<VideotecaScreen> {
             padding: const EdgeInsets.all(12.0),
             child: Text(
               // --- CAMBIO 2: Corregido para mostrar el título real ---
-              video.titulo ?? 'Sin Título', // Usamos el valor de la propiedad
+              video.title ?? 'Sin Título', // Usamos el valor de la propiedad
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

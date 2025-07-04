@@ -72,18 +72,25 @@ class _BuscarNombreScreenState extends State<BuscarNombreScreen> {
   Future<void> loadLocalData() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/plantas.json');
-    
+
     if (await file.exists()) {
       final data = await file.readAsString();
-      setState(() {
-        plantas = (json.decode(data) as List).map((json) => Plants.fromJson(json)).toList();
-        // Al cargar los datos, NO inicializamos plantasFiltradas aquí
-        // Se inicializará cuando se haga la primera búsqueda.
-      });
-      print("data cargada");
+      final decoded = (json.decode(data) as List).map((json) => Plants.fromJson(json)).toList();
+
+      if (decoded.isNotEmpty) {
+        setState(() {
+          plantas = decoded;
+          plantas.sort((a, b) => a.nombreComun!.compareTo(b.nombreComun!));
+          plantasFiltradas = List.from(plantas); // Usa List.from para evitar referencia compartida
+          _mostrarLista = true; // Mostrar lista solo si hay contenido
+        });
+        print("✅ Plantas cargadas: ${plantas.length}");
+      } else {
+        print("⚠️ El archivo existe pero no contiene plantas");
+      }
     } else {
-      print("No se encontraron datos locales.");
-      showErrorMessage(); // Mostrar mensaje si no hay datos locales
+      print("❌ Archivo local no encontrado");
+      showErrorMessage();
     }
   }
 
